@@ -262,16 +262,16 @@ const ManageBox = () => {
     toast.success("Link copied to clipboard!");
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "received":
-        return "secondary";
+        return "bg-blue-500/10 text-blue-500 border-blue-500/30";
       case "under_review":
-        return "default";
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/30";
       case "solved":
-        return "outline";
+        return "bg-green-500/10 text-green-500 border-green-500/30";
       default:
-        return "secondary";
+        return "bg-secondary text-secondary-foreground border-secondary";
     }
   };
 
@@ -542,9 +542,9 @@ const ManageBox = () => {
                             <span>{new Date(complaint.created_at).toLocaleString()}</span>
                           </div>
                         </div>
-                        <Badge variant={getStatusBadgeVariant(complaint.status)} className="self-start">
+                        <div className={`self-start px-4 py-2 rounded-full border text-sm font-semibold ${getStatusColor(complaint.status)}`}>
                           {getStatusLabel(complaint.status)}
-                        </Badge>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -740,10 +740,11 @@ const ManageBox = () => {
               <p className="text-xs text-muted-foreground break-all">
                 <strong>Token:</strong> {selectedComplaint?.token}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                <strong>Status:</strong> <Badge variant={getStatusBadgeVariant(selectedComplaint?.status || "")} className="ml-1">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                <strong>Status:</strong> 
+                <span className={`px-3 py-1 rounded-full border text-xs font-semibold ${getStatusColor(selectedComplaint?.status || "")}`}>
                   {getStatusLabel(selectedComplaint?.status || "")}
-                </Badge>
+                </span>
               </p>
             </div>
           </div>

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Loader2, Search, Calendar, MessageSquare, Download, FileText, Image as ImageIcon, CheckCircle2, Reply } from "lucide-react";
 import FrontendHeader from "@/components/FrontendHeader";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Complaint {
   id: string;
@@ -106,16 +106,16 @@ const TrackComplaint = () => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "received":
-        return "secondary";
+        return "bg-blue-500/10 text-blue-500 border-blue-500/30";
       case "under_review":
-        return "default";
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/30";
       case "solved":
-        return "outline";
+        return "bg-green-500/10 text-green-500 border-green-500/30";
       default:
-        return "secondary";
+        return "bg-secondary text-secondary-foreground border-secondary";
     }
   };
 
@@ -132,6 +132,22 @@ const TrackComplaint = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <FrontendHeader />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <Skeleton className="h-32 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-64 rounded-2xl" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <FrontendHeader />
@@ -139,25 +155,15 @@ const TrackComplaint = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
-          <motion.div
-            className="text-center space-y-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="text-center space-y-3">
             <h1 className="text-4xl sm:text-5xl font-bold gradient-text">Track Your Complaint</h1>
             <p className="text-lg text-muted-foreground">
               Enter your tracking token to check the status of your complaint
             </p>
-          </motion.div>
+          </div>
 
           {/* Search Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="glass-card border-primary/30 shadow-[var(--shadow-strong)]">
+          <Card className="glass-card border-primary/30 shadow-[var(--shadow-strong)]">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
                   <Search className="w-6 h-6 text-primary" />
@@ -199,15 +205,9 @@ const TrackComplaint = () => {
                 </form>
               </CardContent>
             </Card>
-          </motion.div>
 
           {myComplaints.length > 0 && !complaint && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="glass-card">
+            <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-primary" />
@@ -219,33 +219,21 @@ const TrackComplaint = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {myComplaints.map((complaintToken, index) => (
-                    <motion.div
+                    <Button
                       key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 * index }}
+                      variant="outline"
+                      className="w-full justify-start font-mono text-sm break-all h-12 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+                      onClick={() => loadComplaint(complaintToken)}
                     >
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start font-mono text-sm break-all h-12 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
-                        onClick={() => loadComplaint(complaintToken)}
-                      >
-                        {complaintToken}
-                      </Button>
-                    </motion.div>
+                      {complaintToken}
+                    </Button>
                   ))}
                 </CardContent>
               </Card>
-            </motion.div>
           )}
 
           {complaint && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="glass-card border-2 border-primary/50 shadow-[var(--shadow-glow-primary)]">
+            <Card className="glass-card border-2 border-primary/50 shadow-[var(--shadow-glow-primary)]">
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row justify-between gap-4">
                     <div className="space-y-3 flex-1 min-w-0">
@@ -255,9 +243,9 @@ const TrackComplaint = () => {
                         <span className="break-all font-mono">Token: {complaint.token}</span>
                       </div>
                     </div>
-                    <Badge variant={getStatusBadgeVariant(complaint.status)} className="self-start text-base px-4 py-2">
+                    <div className={`self-start text-base px-4 py-2 rounded-full border font-semibold ${getStatusColor(complaint.status)}`}>
                       {getStatusLabel(complaint.status)}
-                    </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -270,12 +258,7 @@ const TrackComplaint = () => {
                   </div>
 
                   {complaint.admin_reply && (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="bg-gradient-to-br from-accent/10 to-primary/10 p-5 rounded-xl border-2 border-accent/30"
-                    >
+                    <div className="bg-gradient-to-br from-accent/10 to-primary/10 p-5 rounded-xl border-2 border-accent/30">
                       <h4 className="font-semibold mb-3 text-base flex items-center gap-2 text-accent">
                         <Reply className="w-4 h-4" />
                         Admin Reply:
@@ -285,7 +268,7 @@ const TrackComplaint = () => {
                         <Calendar className="h-3 w-3" />
                         <span>Replied on {new Date(complaint.replied_at!).toLocaleString()}</span>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
 
                   {complaint.attachment_url && (
@@ -342,21 +325,15 @@ const TrackComplaint = () => {
                   </div>
 
                   {complaint.status === "solved" && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5 }}
-                      className="bg-gradient-to-r from-success/10 to-success/5 p-5 rounded-xl border-2 border-success/30"
-                    >
-                      <p className="text-sm flex items-center gap-2 text-success font-medium">
+                    <div className="bg-gradient-to-r from-green-500/10 to-green-500/5 p-5 rounded-xl border-2 border-green-500/30">
+                      <p className="text-sm flex items-center gap-2 text-green-500 font-medium">
                         <CheckCircle2 className="w-5 h-5" />
                         Your complaint has been resolved
                       </p>
-                    </motion.div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
-            </motion.div>
           )}
         </div>
       </main>
