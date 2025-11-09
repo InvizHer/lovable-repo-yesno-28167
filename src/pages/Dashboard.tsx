@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, FolderOpen, MessageSquare, Trash2, ExternalLink, TrendingUp } from "lucide-react";
+import { Plus, MessageSquare, Trash2, ExternalLink, TrendingUp, BarChart3, Settings, Star } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ import {
 import type { User, Session } from "@supabase/supabase-js";
 import AdminHeader from "@/components/AdminHeader";
 import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
 
 interface ComplaintBox {
   id: string;
@@ -28,6 +29,8 @@ interface ComplaintBox {
   token: string;
   created_at: string;
   complaint_count?: number;
+  feedback_count?: number;
+  avg_rating?: number;
 }
 
 const Dashboard = () => {
@@ -103,18 +106,37 @@ const Dashboard = () => {
       return;
     }
 
-    const boxesWithCounts = await Promise.all(
+    const boxesWithStats = await Promise.all(
       (boxesData || []).map(async (box) => {
-        const { count } = await supabase
+        const { count: complaintCount } = await supabase
           .from("complaints")
           .select("*", { count: "exact", head: true })
           .eq("box_id", box.id);
 
-        return { ...box, complaint_count: count || 0 };
+        const { count: feedbackCount } = await supabase
+          .from("feedbacks")
+          .select("*", { count: "exact", head: true })
+          .eq("box_id", box.id);
+
+        const { data: feedbackData } = await supabase
+          .from("feedbacks")
+          .select("rating")
+          .eq("box_id", box.id);
+
+        const avgRating = feedbackData && feedbackData.length > 0
+          ? feedbackData.reduce((sum, f) => sum + f.rating, 0) / feedbackData.length
+          : 0;
+
+        return { 
+          ...box, 
+          complaint_count: complaintCount || 0,
+          feedback_count: feedbackCount || 0,
+          avg_rating: avgRating
+        };
       })
     );
 
-    setBoxes(boxesWithCounts);
+    setBoxes(boxesWithStats);
   };
 
   const handleDeleteBox = async (boxId: string) => {
@@ -139,19 +161,21 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-primary/5 to-accent/5">
         <AdminHeader />
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-7xl mx-auto space-y-8">
-            <Skeleton className="h-16 w-80 rounded-2xl" />
-            <div className="grid sm:grid-cols-2 gap-6">
-              <Skeleton className="h-40 rounded-2xl" />
-              <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
             </div>
             <Skeleton className="h-48 rounded-2xl" />
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Skeleton className="h-64 rounded-2xl" />
-              <Skeleton className="h-64 rounded-2xl" />
+              <Skeleton className="h-80 rounded-2xl" />
+              <Skeleton className="h-80 rounded-2xl" />
             </div>
           </div>
         </main>
@@ -161,168 +185,250 @@ const Dashboard = () => {
   }
 
   const totalComplaints = boxes.reduce((sum, box) => sum + (box.complaint_count || 0), 0);
+  const totalFeedbacks = boxes.reduce((sum, box) => sum + (box.feedback_count || 0), 0);
+  const overallRating = boxes.length > 0 && totalFeedbacks > 0
+    ? boxes.reduce((sum, box) => sum + (box.avg_rating || 0) * (box.feedback_count || 0), 0) / totalFeedbacks
+    : 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-primary/5 to-accent/5">
       <AdminHeader />
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="space-y-2 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl font-bold gradient-text">Dashboard</h1>
-            <p className="text-lg text-muted-foreground">
-              Welcome back, {profile?.username || user?.email?.split('@')[0]} 👋
-            </p>
-          </div>
+          {/* Welcome Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card p-6 sm:p-8 rounded-3xl shadow-[var(--shadow-strong)] border-primary/20"
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-bold gradient-text mb-2">
+                  Welcome back, {profile?.username || user?.email?.split('@')[0]}! 👋
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Here's your complaint management overview
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate("/create-box")}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 gap-2 shadow-lg"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="hidden sm:inline">Create New Box</span>
+                <span className="sm:hidden">Create</span>
+              </Button>
+            </div>
+          </motion.div>
 
-          {/* Stats Cards */}
-          <div className="grid sm:grid-cols-2 gap-6 animate-fade-in">
-            <Card className="glass-card hover:shadow-[var(--shadow-glow-primary)] transition-all duration-300 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent">
-                    <FolderOpen className="w-6 h-6 text-white" />
+          {/* Stats Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+          >
+            <Card className="glass-card border-primary/30 hover:border-primary/50 transition-all hover:shadow-[var(--shadow-glow-primary)]">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Boxes</p>
+                    <p className="text-3xl font-bold gradient-text mt-1">{boxes.length}</p>
                   </div>
-                  Complaint Boxes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-5xl font-bold gradient-text">{boxes.length}</p>
-                <p className="text-sm text-muted-foreground mt-2">Active boxes</p>
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
+                    <MessageSquare className="w-6 h-6 text-primary" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="glass-card hover:shadow-[var(--shadow-glow-accent)] transition-all duration-300 border-accent/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary">
-                      <MessageSquare className="w-6 h-6 text-white" />
-                    </div>
-                    Total Complaints
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-5xl font-bold gradient-text">{totalComplaints}</p>
-                  <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
-                    <TrendingUp className="w-4 h-4" />
-                    All time submissions
-                  </p>
-                </CardContent>
-              </Card>
-          </div>
-
-          {/* Create New Box CTA */}
-          <Card className="glass-card border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-[var(--shadow-glow-primary)] animate-fade-in">
-              <CardHeader>
-                <CardTitle className="text-2xl gradient-text">Create New Complaint Box</CardTitle>
-                <CardDescription className="text-base">
-                  Set up a new complaint box to collect feedback anonymously
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={() => navigate("/create-box")} 
-                  size="lg" 
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Complaint Box
-                </Button>
+            <Card className="glass-card border-accent/30 hover:border-accent/50 transition-all hover:shadow-[var(--shadow-glow-accent)]">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Complaints</p>
+                    <p className="text-3xl font-bold gradient-text mt-1">{totalComplaints}</p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20">
+                    <TrendingUp className="w-6 h-6 text-accent" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-          {/* Complaint Boxes Grid */}
-          <div className="space-y-6 animate-fade-in">
-            <h2 className="text-3xl font-bold">
-              Your Complaint Boxes
-            </h2>
+            <Card className="glass-card border-success/30 hover:border-success/50 transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Feedbacks</p>
+                    <p className="text-3xl font-bold text-success mt-1">{totalFeedbacks}</p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-success/20">
+                    <BarChart3 className="w-6 h-6 text-success" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-warning/30 hover:border-warning/50 transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Avg Rating</p>
+                    <p className="text-3xl font-bold text-warning mt-1">
+                      {overallRating > 0 ? overallRating.toFixed(1) : "N/A"}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-warning/20">
+                    <Star className="w-6 h-6 text-warning" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Complaint Boxes */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold gradient-text">Your Complaint Boxes</h2>
+            </div>
             
             {boxes.length === 0 ? (
-              <Card className="glass-card">
-                  <CardContent className="py-20 text-center">
-                    <FolderOpen className="w-20 h-20 mx-auto text-muted-foreground mb-6 opacity-50" />
-                    <p className="text-xl text-muted-foreground">
-                      No complaint boxes yet. Create your first one to get started!
-                    </p>
-                  </CardContent>
-                </Card>
+              <Card className="glass-card border-dashed border-2 border-primary/30">
+                <CardContent className="py-20 text-center">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 w-fit mx-auto mb-6">
+                    <MessageSquare className="w-16 h-16 text-primary opacity-50" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">No complaint boxes yet</h3>
+                  <p className="text-lg text-muted-foreground mb-6">
+                    Create your first complaint box to get started!
+                  </p>
+                  <Button 
+                    onClick={() => navigate("/create-box")} 
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create Your First Box
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {boxes.map((box) => (
-                  <Card key={box.id} className="glass-card hover:shadow-[var(--shadow-strong)] transition-all duration-300 group h-full flex flex-col">
+                {boxes.map((box, index) => (
+                  <motion.div
+                    key={box.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + index * 0.05 }}
+                  >
+                    <Card className="glass-card hover:shadow-[var(--shadow-strong)] transition-all duration-300 group border-primary/20 hover:border-primary/40 h-full flex flex-col">
                       <CardHeader className="flex-1">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <CardTitle className="text-xl break-words line-clamp-2 flex-1 group-hover:text-primary transition-colors">
-                            {box.title}
-                          </CardTitle>
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-                            <MessageSquare className="w-5 h-5 text-primary flex-shrink-0" />
+                        <div className="space-y-4">
+                          <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 w-fit group-hover:scale-110 transition-transform">
+                            <MessageSquare className="w-8 h-8 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl break-words line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                              {box.title}
+                            </CardTitle>
+                            <CardDescription className="text-sm break-words line-clamp-2">
+                              {box.description || "No description"}
+                            </CardDescription>
                           </div>
                         </div>
-                        <CardDescription className="text-sm break-words line-clamp-2">
-                          {box.description || "No description"}
-                        </CardDescription>
                       </CardHeader>
+                      
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5">
-                          <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground">Complaints</p>
-                            <p className="text-2xl font-bold text-primary">{box.complaint_count}</p>
+                        {/* Stats */}
+                        <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10">
+                          <div className="text-center">
+                            <p className="text-xs text-muted-foreground mb-1">Complaints</p>
+                            <p className="text-lg font-bold text-primary">{box.complaint_count}</p>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground">Created</p>
-                            <p className="text-xs font-medium">{new Date(box.created_at).toLocaleDateString()}</p>
+                          <div className="text-center border-x border-border">
+                            <p className="text-xs text-muted-foreground mb-1">Feedbacks</p>
+                            <p className="text-lg font-bold text-accent">{box.feedback_count}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-muted-foreground mb-1">Rating</p>
+                            <p className="text-lg font-bold text-warning">
+                              {box.avg_rating && box.avg_rating > 0 ? box.avg_rating.toFixed(1) : "N/A"}
+                            </p>
                           </div>
                         </div>
+
+                        <p className="text-xs text-muted-foreground">
+                          Created {new Date(box.created_at).toLocaleDateString()}
+                        </p>
                         
-                        <div className="flex flex-col gap-2">
+                        {/* Actions */}
+                        <div className="flex flex-col gap-2 pt-2">
                           <Button
                             onClick={() => navigate(`/manage/${box.id}`)}
-                            className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                            className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 gap-2"
                             size="sm"
                           >
-                            <ExternalLink className="w-4 h-4 mr-2" />
+                            <Settings className="w-4 h-4" />
                             Manage
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full border-destructive/50 text-destructive hover:bg-destructive hover:text-white"
-                                disabled={deletingBox === box.id}
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                {deletingBox === box.id ? "Deleting..." : "Delete"}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete this complaint box and all associated complaints. 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteBox(box.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              onClick={() => navigate(`/analytics/${box.id}`)}
+                              variant="outline"
+                              size="sm"
+                              className="border-primary/30 hover:bg-primary/10"
+                            >
+                              <BarChart3 className="w-4 h-4 mr-1" />
+                              <span className="text-xs">Analytics</span>
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-destructive/50 text-destructive hover:bg-destructive hover:text-white"
+                                  disabled={deletingBox === box.id}
                                 >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  <span className="text-xs">{deletingBox === box.id ? "Deleting..." : "Delete"}</span>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete this complaint box and all associated complaints. 
+                                    This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteBox(box.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
+                  </motion.div>
                 ))}
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </main>
 

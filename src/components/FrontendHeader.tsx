@@ -23,20 +23,22 @@ const FrontendHeader = () => {
           </div>
           
           <nav className="flex items-center gap-2">
+            {/* Desktop: Track Complaint button */}
             <Button 
               variant="ghost" 
               onClick={() => navigate("/track")}
-              className="text-sm sm:text-base rounded-full"
+              className="hidden md:flex text-sm rounded-full"
             >
-              <span className="hidden sm:inline">Track Complaint</span>
-              <span className="sm:hidden">Track</span>
+              Track Complaint
             </Button>
+            {/* Mobile: Track icon button */}
             <Button 
-              variant="outline" 
-              onClick={() => navigate("/login")}
-              className="text-sm sm:text-base rounded-full"
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/track")}
+              className="md:hidden rounded-full"
             >
-              Login
+              <MessageSquare className="h-4 w-4" />
             </Button>
             <ThemeToggle />
           </nav>

@@ -368,7 +368,7 @@ const ComplaintBox = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Submit & Track */}
+            {/* Left Column - Submit Complaint (Desktop & Mobile) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Submit Complaint */}
               <motion.div
@@ -497,8 +497,232 @@ const ComplaintBox = () => {
                   </CardContent>
                 </Card>
               </motion.div>
+            </div>
 
+            {/* Right Column - Track, Your Complaints, Share Feedback, Recent Feedbacks (Desktop only) */}
+            <div className="hidden lg:block lg:col-span-1 space-y-6">
               {/* Track Complaint */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Card className="glass-card border-accent/20 shadow-[var(--shadow-medium)]">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Search className="h-5 w-5" />
+                      Track Complaint
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Enter tracking token
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-col gap-2">
+                      <Input
+                        placeholder="CPL-XXXXXXXXXX"
+                        value={trackToken}
+                        onChange={(e) => setTrackToken(e.target.value)}
+                        className="text-sm bg-background/50"
+                      />
+                      <Button onClick={handleTrack} className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90">
+                        Track
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Your Complaints */}
+              {yourComplaints.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <Card className="glass-card shadow-[var(--shadow-medium)]">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Your Complaints</CardTitle>
+                      <CardDescription className="text-xs">
+                        From this box
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                        {yourComplaints.map((complaint, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <div className="space-y-2 p-3 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10">
+                              <p className="text-sm font-medium line-clamp-1 break-words">
+                                {complaint.title}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                <Badge variant="outline" className="text-xs">
+                                  {complaint.status.replace("_", " ")}
+                                </Badge>
+                              </div>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0 text-xs"
+                                onClick={() => navigate(`/track?token=${complaint.token}`)}
+                              >
+                                Track →
+                              </Button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Share Feedback */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <Card className="glass-card border-accent/30 shadow-[var(--shadow-medium)]">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2 gradient-text">
+                      <Star className="w-5 h-5 fill-primary text-primary" />
+                      Share Feedback
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Rate this complaint box
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Rating *</Label>
+                        <div className="flex gap-1 justify-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setFeedbackRating(star)}
+                              className="transition-all hover:scale-110"
+                            >
+                              <Star
+                                className={`w-7 h-7 ${
+                                  star <= feedbackRating
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-muted-foreground"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="feedback-message" className="text-sm">
+                          Message (Optional)
+                        </Label>
+                        <Textarea
+                          id="feedback-message"
+                          placeholder="Share your thoughts..."
+                          value={feedbackMessage}
+                          onChange={(e) => setFeedbackMessage(e.target.value)}
+                          disabled={submittingFeedback}
+                          rows={2}
+                          className="text-sm resize-none bg-background/50"
+                        />
+                      </div>
+
+                      <Button 
+                        type="submit" 
+                        disabled={submittingFeedback || feedbackRating === 0} 
+                        className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                      >
+                        {submittingFeedback ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Submit"
+                        )}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Recent Feedbacks */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <Card className="glass-card shadow-[var(--shadow-medium)]">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Star className="w-5 h-5 fill-accent text-accent" />
+                      Recent Feedbacks
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      What others say
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {feedbacks.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-6">
+                        No feedbacks yet
+                      </p>
+                    ) : (
+                      <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        {feedbacks.map((feedback, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <div className="space-y-2 p-3 rounded-lg bg-gradient-to-br from-accent/5 to-primary/5 border border-accent/10">
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-3 h-3 ${
+                                      star <= feedback.rating
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              {feedback.message && (
+                                <p className="text-xs text-muted-foreground line-clamp-2 break-words">
+                                  {feedback.message}
+                                </p>
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(feedback.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {index < feedbacks.length - 1 && (
+                              <Separator className="my-2" />
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Mobile sections - Track, Your Complaints, Share Feedback, Recent Feedbacks */}
+            <div className="lg:hidden space-y-6">
+              {/* Track Complaint - Mobile */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -530,7 +754,7 @@ const ComplaintBox = () => {
                 </Card>
               </motion.div>
 
-              {/* Your Complaints */}
+              {/* Your Complaints - Mobile */}
               {yourComplaints.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -585,7 +809,7 @@ const ComplaintBox = () => {
                 </motion.div>
               )}
 
-              {/* Submit Feedback */}
+              {/* Submit Feedback - Mobile */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -605,7 +829,7 @@ const ComplaintBox = () => {
                     <form onSubmit={handleSubmitFeedback} className="space-y-4">
                       <div className="space-y-2">
                         <Label>Rating <span className="text-destructive">*</span></Label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 justify-center">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
@@ -626,11 +850,11 @@ const ComplaintBox = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="feedback-message">
+                        <Label htmlFor="feedback-message-mobile">
                           Message (Optional)
                         </Label>
                         <Textarea
-                          id="feedback-message"
+                          id="feedback-message-mobile"
                           placeholder="Share your thoughts..."
                           value={feedbackMessage}
                           onChange={(e) => setFeedbackMessage(e.target.value)}
@@ -658,16 +882,14 @@ const ComplaintBox = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </div>
 
-            {/* Right Column - Feedbacks */}
-            <div className="lg:col-span-1 space-y-6">
+              {/* Recent Feedbacks - Mobile */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
-                <Card className="glass-card shadow-[var(--shadow-medium)] sticky top-6">
+                <Card className="glass-card shadow-[var(--shadow-medium)]">
                   <CardHeader>
                     <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                       <Star className="w-5 h-5 fill-accent text-accent" />
@@ -683,7 +905,7 @@ const ComplaintBox = () => {
                         No feedbacks yet
                       </p>
                     ) : (
-                      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                      <div className="space-y-3">
                         {feedbacks.map((feedback, index) => (
                           <motion.div
                             key={index}

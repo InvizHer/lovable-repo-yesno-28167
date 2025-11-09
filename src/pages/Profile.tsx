@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, User, Lock, Mail, ArrowLeft } from "lucide-react";
+import { Trash2, User, Lock, Mail, ArrowLeft, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Profile = () => {
@@ -117,6 +117,16 @@ const Profile = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Failed to logout");
+      return;
+    }
+    toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   const handleDeleteAccount = async () => {
@@ -324,10 +334,18 @@ const Profile = () => {
                   Danger Zone
                 </CardTitle>
                 <CardDescription>
-                  Permanently delete your account and all associated data
+                  Permanently delete your account and all associated data, or logout
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="gap-2 border-primary/30 hover:bg-primary/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" disabled={deleting} className="gap-2">

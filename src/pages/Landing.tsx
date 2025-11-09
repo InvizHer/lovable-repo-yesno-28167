@@ -276,13 +276,13 @@ const Landing = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >
-        <div className="absolute inset-0 bg-[var(--gradient-primary)]" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIuMSIvPjwvZz48L3N2Zz4=')] opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIuMTUiLz48L2c+PC9zdmc+')] opacity-20" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <motion.h2 
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -291,7 +291,7 @@ const Landing = () => {
               Ready to Get Started?
             </motion.h2>
             <motion.p 
-              className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto"
+              className="text-lg sm:text-xl text-white drop-shadow-md max-w-2xl mx-auto"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -308,7 +308,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="text-lg px-10 py-6 rounded-2xl bg-white text-primary hover:bg-white/90 shadow-2xl"
+                className="text-lg px-10 py-6 rounded-2xl bg-white text-primary hover:bg-white/90 shadow-2xl font-semibold"
                 onClick={() => navigate("/signup")}
               >
                 <Sparkles className="mr-2 h-5 w-5" />

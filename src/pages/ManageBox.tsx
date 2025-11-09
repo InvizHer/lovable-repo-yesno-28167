@@ -314,7 +314,7 @@ const ManageBox = () => {
 
       <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Box Details */}
+          {/* Box Details with Icon */}
           <div className="animate-fade-in">
             <Card className="glass-card border-primary/30 shadow-[var(--shadow-strong)]">
               <CardHeader>
@@ -375,21 +375,23 @@ const ManageBox = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-2xl sm:text-3xl lg:text-4xl mb-3 break-words gradient-text">
-                          {box.title}
-                        </CardTitle>
-                        <CardDescription className="text-base sm:text-lg break-words">
-                          {box.description || "No description"}
-                        </CardDescription>
-                        <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          <span>Created {new Date(box.created_at).toLocaleDateString()}</span>
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent flex-shrink-0">
+                          <MessageSquare className="h-8 w-8 text-white" />
                         </div>
-                      </div>
-                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex-shrink-0">
-                        <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <CardTitle className="text-2xl sm:text-3xl lg:text-4xl break-words text-foreground">
+                            {box.title}
+                          </CardTitle>
+                          <CardDescription className="text-base sm:text-lg break-words text-foreground/80">
+                            {box.description || "No description"}
+                          </CardDescription>
+                          <div className="flex items-center gap-2 text-sm text-foreground/70">
+                            <Calendar className="h-4 w-4" />
+                            <span>Created {new Date(box.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -557,40 +559,6 @@ const ManageBox = () => {
                           <p className="text-xs text-muted-foreground">
                             Replied on {new Date(complaint.replied_at!).toLocaleString()}
                           </p>
-                        </div>
-                      )}
-
-                      {complaint.attachment_url && (
-                        <div className="bg-accent/10 border border-accent/20 p-4 rounded-lg space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              {complaint.attachment_type?.startsWith("image/") ? (
-                                <ImageIcon className="w-4 h-4 text-accent flex-shrink-0" />
-                              ) : (
-                                <FileText className="w-4 h-4 text-accent flex-shrink-0" />
-                              )}
-                              <span className="text-xs font-medium truncate">
-                                {complaint.attachment_name}
-                              </span>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2"
-                              onClick={() => window.open(complaint.attachment_url!, "_blank")}
-                            >
-                              <Download className="w-3 h-3" />
-                            </Button>
-                          </div>
-                          {complaint.attachment_type?.startsWith("image/") && (
-                            <div className="relative w-full aspect-video bg-muted rounded-md overflow-hidden">
-                              <img
-                                src={complaint.attachment_url}
-                                alt="Attachment preview"
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          )}
                         </div>
                       )}
 
