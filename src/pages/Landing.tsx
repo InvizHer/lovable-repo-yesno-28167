@@ -62,74 +62,107 @@ const Landing = () => {
       <FrontendHeader />
       
       {/* Hero Section */}
-      <section className="relative flex-1 flex items-center">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-[var(--gradient-primary)] opacity-5" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-10" />
+      <section className="relative flex-1 flex items-center overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         
-        <div className="container mx-auto px-4 py-20 relative z-10">
-          <div className="max-w-5xl mx-auto text-center space-y-8">
-            <div className="relative inline-flex flex-col items-center">
-              {/* Icon Grid Background */}
-              <div className="absolute inset-0 -m-12 grid grid-cols-3 gap-8 opacity-20">
-                <div className="p-3 rounded-2xl bg-primary/20">
-                  <Shield className="h-8 w-8 text-primary" />
-                </div>
-                <div className="p-3 rounded-2xl bg-accent/20">
-                  <Lock className="h-8 w-8 text-accent" />
-                </div>
-                <div className="p-3 rounded-2xl bg-primary/20">
-                  <TrendingUp className="h-8 w-8 text-primary" />
-                </div>
+        <div className="container mx-auto px-4 py-16 sm:py-20 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+            {/* Left Content */}
+            <div className="space-y-8 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Anonymous & Secure Platform</span>
               </div>
               
-              {/* Main Icon */}
-              <div className="relative z-10 p-6 rounded-3xl glass-card border-2 border-primary/20">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-accent">
-                  <MessageSquare className="h-16 w-16 text-white" />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+                Your Voice,
+                <span className="gradient-text block">Your Privacy</span>
+              </h1>
+              
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
+                Empower your institution with a secure feedback system. Submit complaints anonymously, track progress transparently, and foster better communication.
+              </p>
+              
+              <div className="flex gap-4 justify-center lg:justify-start flex-wrap">
+                <Button 
+                  size="lg" 
+                  className="text-base px-8 py-6 rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-lg"
+                  onClick={() => navigate("/login")}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Get Started
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-base px-8 py-6 rounded-full border-2"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up Free
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-center lg:justify-start gap-8 pt-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold gradient-text">100%</div>
+                  <div className="text-xs text-muted-foreground">Anonymous</div>
+                </div>
+                <div className="w-px h-10 bg-border" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold gradient-text">Secure</div>
+                  <div className="text-xs text-muted-foreground">Encrypted</div>
+                </div>
+                <div className="w-px h-10 bg-border" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold gradient-text">Fast</div>
+                  <div className="text-xs text-muted-foreground">Real-time</div>
                 </div>
               </div>
             </div>
-            
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold gradient-text">
-              Welcome to TellUs
-            </h1>
-            
-            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              A modern, secure platform for anonymous feedback and complaint management in educational institutions and organizations
-            </p>
-            
-            <div className="flex gap-4 justify-center flex-wrap">
-              <Button 
-                size="lg" 
-                className="text-base sm:text-lg px-8 py-6 rounded-2xl bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[var(--shadow-glow-primary)] group"
-                onClick={() => navigate("/login")}
-              >
-                <Sparkles className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                Get Started
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-base sm:text-lg px-8 py-6 rounded-2xl border-2 hover:border-primary hover:bg-primary/5"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up Free
-              </Button>
-            </div>
 
-            <div className="flex items-center justify-center gap-6 pt-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Zap className="h-4 w-4 text-primary" />
-                <span>Lightning Fast</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4 text-primary" />
-                <span>100% Secure</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 text-primary" />
-                <span>Easy to Use</span>
+            {/* Right Visual */}
+            <div className="relative hidden lg:block">
+              <div className="relative">
+                {/* Main Card */}
+                <div className="glass-card p-8 rounded-3xl border-2 border-primary/20 shadow-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent">
+                      <MessageSquare className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Complaint Box</div>
+                      <div className="text-sm text-muted-foreground">Anonymous Feedback</div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-3 bg-muted rounded-full w-3/4" />
+                    <div className="h-3 bg-muted rounded-full w-full" />
+                    <div className="h-3 bg-muted rounded-full w-5/6" />
+                  </div>
+                  <div className="mt-6 flex gap-2">
+                    <div className="h-10 flex-1 bg-gradient-to-r from-primary to-accent rounded-xl" />
+                  </div>
+                </div>
+
+                {/* Floating Cards */}
+                <div className="absolute -top-6 -right-6 glass-card p-4 rounded-2xl border shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium">Encrypted</span>
+                  </div>
+                </div>
+
+                <div className="absolute -bottom-6 -left-6 glass-card p-4 rounded-2xl border shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-accent" />
+                    <span className="text-sm font-medium">Track Status</span>
+                  </div>
+                </div>
+
+                {/* Background Shapes */}
+                <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-2xl" />
               </div>
             </div>
           </div>
