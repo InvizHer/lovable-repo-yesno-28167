@@ -2,12 +2,16 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
 
 const FrontendHeader = () => {
   const navigate = useNavigate();
+  const isVisible = useScrollHeader();
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b">
+    <header className={`sticky top-0 z-50 w-full glass border-b transition-transform duration-300 ${
+      isVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div 

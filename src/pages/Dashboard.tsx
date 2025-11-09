@@ -21,6 +21,7 @@ import type { User, Session } from "@supabase/supabase-js";
 import AdminHeader from "@/components/AdminHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEOHead from "@/components/SEOHead";
 
 interface ComplaintBox {
   id: string;
@@ -192,6 +193,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-primary/5 to-accent/5">
+      <SEOHead 
+        title="Admin Dashboard"
+        description="Manage your complaint boxes, review submissions, track analytics, and respond to feedback in your TellUs admin dashboard."
+        keywords="admin dashboard, complaint management, box management, analytics, feedback review"
+      />
       <AdminHeader />
 
       <main className="flex-1 container mx-auto px-4 py-8">

@@ -10,6 +10,7 @@ import { Loader2, Lock, Mail } from "lucide-react";
 import FrontendHeader from "@/components/FrontendHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEOHead from "@/components/SEOHead";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,6 +52,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead 
+        title="Admin Login"
+        description="Login to TellUs admin dashboard to manage your complaint boxes, review submissions, and track analytics."
+        keywords="admin login, complaint management, dashboard access, secure login"
+      />
       <FrontendHeader />
       
       <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">

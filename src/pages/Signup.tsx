@@ -10,6 +10,7 @@ import { Loader2, UserPlus, User, Mail, Lock } from "lucide-react";
 import FrontendHeader from "@/components/FrontendHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEOHead from "@/components/SEOHead";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -69,6 +70,11 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead 
+        title="Create Admin Account"
+        description="Sign up for TellUs to create and manage complaint boxes for your educational institution or organization."
+        keywords="admin signup, create account, complaint management system, register"
+      />
       <FrontendHeader />
       
       <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">

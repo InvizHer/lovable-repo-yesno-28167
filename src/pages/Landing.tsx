@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import FrontendHeader from "@/components/FrontendHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import SEOHead from "@/components/SEOHead";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -59,6 +60,11 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
+      <SEOHead 
+        title="Anonymous Feedback Platform"
+        description="A modern, secure platform for anonymous feedback and complaint management in educational institutions and organizations. Submit and track complaints anonymously."
+        keywords="complaint management, anonymous feedback, educational institutions, feedback system, secure complaints, track complaints"
+      />
       <FrontendHeader />
       
       {/* Hero Section */}

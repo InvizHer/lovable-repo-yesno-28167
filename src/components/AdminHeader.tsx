@@ -4,9 +4,11 @@ import { MessageSquare, LogOut, LayoutDashboard, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ThemeToggle from "./ThemeToggle";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
+  const isVisible = useScrollHeader();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -19,7 +21,9 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b">
+    <header className={`sticky top-0 z-50 w-full glass border-b transition-transform duration-300 ${
+      isVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div 
