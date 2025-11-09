@@ -1,0 +1,369 @@
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Loader2, Search, Calendar, MessageSquare, Download, FileText, Image as ImageIcon, CheckCircle2, Reply } from "lucide-react";
+import FrontendHeader from "@/components/FrontendHeader";
+import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
+
+interface Complaint {
+  id: string;
+  title: string;
+  message: string;
+  status: string;
+  token: string;
+  created_at: string;
+  updated_at: string;
+  admin_reply: string | null;
+  replied_at: string | null;
+  attachment_url: string | null;
+  attachment_name: string | null;
+  attachment_type: string | null;
+}
+
+const TrackComplaint = () => {
+  const location = useLocation();
+  const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [complaint, setComplaint] = useState<Complaint | null>(null);
+  const [myComplaints, setMyComplaints] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Load complaints from localStorage
+    const stored = JSON.parse(localStorage.getItem("myComplaints") || "[]");
+    setMyComplaints(stored.map((c: any) => c.token));
+
+    // Check URL params for token
+    const params = new URLSearchParams(location.search);
+    const urlToken = params.get("token");
+    if (urlToken) {
+      setToken(urlToken);
+      loadComplaint(urlToken);
+    }
+  }, [location]);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!token) {
+      toast.error("Please enter a tracking token");
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from("complaints")
+        .select("*")
+        .eq("token", token.toUpperCase())
+        .single();
+
+      if (error || !data) {
+        toast.error("Complaint not found");
+        setComplaint(null);
+        return;
+      }
+
+      setComplaint(data);
+    } catch (error: any) {
+      toast.error("An error occurred while searching");
+      setComplaint(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadComplaint = async (complaintToken: string) => {
+    setToken(complaintToken);
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from("complaints")
+        .select("*")
+        .eq("token", complaintToken)
+        .single();
+
+      if (error || !data) {
+        toast.error("Complaint not found");
+        setComplaint(null);
+        return;
+      }
+
+      setComplaint(data);
+    } catch (error: any) {
+      toast.error("An error occurred while loading complaint");
+      setComplaint(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "received":
+        return "secondary";
+      case "under_review":
+        return "default";
+      case "solved":
+        return "outline";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "received":
+        return "Received";
+      case "under_review":
+        return "Under Review";
+      case "solved":
+        return "Solved";
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <FrontendHeader />
+      
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <motion.div
+            className="text-center space-y-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl sm:text-5xl font-bold gradient-text">Track Your Complaint</h1>
+            <p className="text-lg text-muted-foreground">
+              Enter your tracking token to check the status of your complaint
+            </p>
+          </motion.div>
+
+          {/* Search Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="glass-card border-primary/30 shadow-[var(--shadow-strong)]">
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Search className="w-6 h-6 text-primary" />
+                  Search by Token
+                </CardTitle>
+                <CardDescription>
+                  Your unique tracking identifier
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSearch} className="space-y-5">
+                  <div className="space-y-3">
+                    <Label htmlFor="token" className="text-base">Tracking Token</Label>
+                    <div className="flex gap-3">
+                      <Input
+                        id="token"
+                        placeholder="CPL-XXXXXXXXXX"
+                        value={token}
+                        onChange={(e) => setToken(e.target.value.toUpperCase())}
+                        disabled={loading}
+                        className="text-base h-12 font-mono"
+                      />
+                      <Button 
+                        type="submit" 
+                        disabled={loading} 
+                        className="whitespace-nowrap h-12 px-6 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                      >
+                        {loading ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <>
+                            <Search className="w-5 h-5 sm:mr-2" />
+                            <span className="hidden sm:inline">Search</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {myComplaints.length > 0 && !complaint && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-xl sm:text-2xl flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    Your Recent Complaints
+                  </CardTitle>
+                  <CardDescription>
+                    Complaints submitted from this browser
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {myComplaints.map((complaintToken, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start font-mono text-sm break-all h-12 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+                        onClick={() => loadComplaint(complaintToken)}
+                      >
+                        {complaintToken}
+                      </Button>
+                    </motion.div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {complaint && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="glass-card border-2 border-primary/50 shadow-[var(--shadow-glow-primary)]">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="space-y-3 flex-1 min-w-0">
+                      <CardTitle className="text-2xl sm:text-3xl break-words gradient-text">{complaint.title}</CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MessageSquare className="h-4 w-4" />
+                        <span className="break-all font-mono">Token: {complaint.token}</span>
+                      </div>
+                    </div>
+                    <Badge variant={getStatusBadgeVariant(complaint.status)} className="self-start text-base px-4 py-2">
+                      {getStatusLabel(complaint.status)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-5 rounded-xl border border-primary/10">
+                    <h4 className="font-semibold mb-3 text-base flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-primary" />
+                      Your Complaint:
+                    </h4>
+                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{complaint.message}</p>
+                  </div>
+
+                  {complaint.admin_reply && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="bg-gradient-to-br from-accent/10 to-primary/10 p-5 rounded-xl border-2 border-accent/30"
+                    >
+                      <h4 className="font-semibold mb-3 text-base flex items-center gap-2 text-accent">
+                        <Reply className="w-4 h-4" />
+                        Admin Reply:
+                      </h4>
+                      <p className="text-sm whitespace-pre-wrap break-words mb-3 leading-relaxed">{complaint.admin_reply}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>Replied on {new Date(complaint.replied_at!).toLocaleString()}</span>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {complaint.attachment_url && (
+                    <div className="bg-secondary/30 p-5 rounded-xl border border-border">
+                      <h4 className="font-semibold mb-3 text-base">Attachment:</h4>
+                      <div className="flex items-center justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {complaint.attachment_type?.startsWith("image/") ? (
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <ImageIcon className="w-5 h-5 text-primary flex-shrink-0" />
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-lg bg-accent/10">
+                              <FileText className="w-5 h-5 text-accent flex-shrink-0" />
+                            </div>
+                          )}
+                          <span className="text-sm font-medium truncate">{complaint.attachment_name}</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(complaint.attachment_url!, "_blank")}
+                          className="gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span className="hidden sm:inline">Download</span>
+                        </Button>
+                      </div>
+                      {complaint.attachment_type?.startsWith("image/") && (
+                        <div className="rounded-xl overflow-hidden border border-border">
+                          <img
+                            src={complaint.attachment_url}
+                            alt="Attachment"
+                            className="w-full h-auto object-contain max-h-96"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                    <div className="bg-secondary/50 p-4 rounded-xl">
+                      <span className="text-muted-foreground block mb-2 text-xs">Submitted:</span>
+                      <p className="font-medium">
+                        {new Date(complaint.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-secondary/50 p-4 rounded-xl">
+                      <span className="text-muted-foreground block mb-2 text-xs">Last Updated:</span>
+                      <p className="font-medium">
+                        {new Date(complaint.updated_at).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {complaint.status === "solved" && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="bg-gradient-to-r from-success/10 to-success/5 p-5 rounded-xl border-2 border-success/30"
+                    >
+                      <p className="text-sm flex items-center gap-2 text-success font-medium">
+                        <CheckCircle2 className="w-5 h-5" />
+                        Your complaint has been resolved
+                      </p>
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default TrackComplaint;
