@@ -68,47 +68,38 @@ const Landing = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-10" />
         
         <div className="container mx-auto px-4 py-20 relative z-10">
-          <motion.div 
-            className="max-w-5xl mx-auto text-center space-y-8"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.div 
-              className="inline-block"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", duration: 0.8, delay: 0.2 }}
-            >
-              <div className="p-4 rounded-3xl bg-gradient-to-br from-primary to-accent shadow-[var(--shadow-glow-primary)] animate-float">
-                <MessageSquare className="h-20 w-20 text-white" />
+          <div className="max-w-5xl mx-auto text-center space-y-8">
+            <div className="relative inline-flex flex-col items-center">
+              {/* Icon Grid Background */}
+              <div className="absolute inset-0 -m-12 grid grid-cols-3 gap-8 opacity-20">
+                <div className="p-3 rounded-2xl bg-primary/20">
+                  <Shield className="h-8 w-8 text-primary" />
+                </div>
+                <div className="p-3 rounded-2xl bg-accent/20">
+                  <Lock className="h-8 w-8 text-accent" />
+                </div>
+                <div className="p-3 rounded-2xl bg-primary/20">
+                  <TrendingUp className="h-8 w-8 text-primary" />
+                </div>
               </div>
-            </motion.div>
+              
+              {/* Main Icon */}
+              <div className="relative z-10 p-6 rounded-3xl glass-card border-2 border-primary/20">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-accent">
+                  <MessageSquare className="h-16 w-16 text-white" />
+                </div>
+              </div>
+            </div>
             
-            <motion.h1 
-              className="text-5xl sm:text-6xl md:text-7xl font-bold gradient-text"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold gradient-text">
               Welcome to TellUs
-            </motion.h1>
+            </h1>
             
-            <motion.p 
-              className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
               A modern, secure platform for anonymous feedback and complaint management in educational institutions and organizations
-            </motion.p>
+            </p>
             
-            <motion.div 
-              className="flex gap-4 justify-center flex-wrap"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
+            <div className="flex gap-4 justify-center flex-wrap">
               <Button 
                 size="lg" 
                 className="text-base sm:text-lg px-8 py-6 rounded-2xl bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[var(--shadow-glow-primary)] group"
@@ -125,14 +116,9 @@ const Landing = () => {
               >
                 Sign Up Free
               </Button>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="flex items-center justify-center gap-6 pt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-            >
+            <div className="flex items-center justify-center gap-6 pt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Zap className="h-4 w-4 text-primary" />
                 <span>Lightning Fast</span>
@@ -145,8 +131,8 @@ const Landing = () => {
                 <Star className="h-4 w-4 text-primary" />
                 <span>Easy to Use</span>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 

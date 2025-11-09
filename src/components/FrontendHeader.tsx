@@ -17,7 +17,7 @@ const FrontendHeader = () => {
             <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-accent group-hover:scale-110 transition-transform">
               <MessageSquare className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text hidden sm:inline">
+            <span className="text-xl font-bold gradient-text">
               TellUs
             </span>
           </div>
