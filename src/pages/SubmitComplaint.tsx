@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Copy, Upload, X, Send } from "lucide-react";
@@ -16,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getSubcategories, requiresCustomInput } from "@/config/categories";
 
 const SubmitComplaint = () => {
   const { token } = useParams<{ token: string }>();
@@ -32,6 +34,9 @@ const SubmitComplaint = () => {
   const [complaintToken, setComplaintToken] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(false);
+  const [complaintCategory, setComplaintCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
   useEffect(() => {
     fetchBox();
@@ -53,6 +58,12 @@ const SubmitComplaint = () => {
     setBox(data);
     setPasswordRequired(!!data.password);
     setAuthenticated(!data.password);
+    
+    // Set available categories based on box category
+    const boxCategory = (data as any).category || "";
+    const subcats = getSubcategories(boxCategory);
+    setAvailableCategories(subcats);
+    
     setLoading(false);
   };
 
@@ -109,6 +120,16 @@ const SubmitComplaint = () => {
       return;
     }
 
+    if (!complaintCategory) {
+      toast.error("Please select a complaint category");
+      return;
+    }
+
+    if (complaintCategory === "Other" && !customCategory.trim()) {
+      toast.error("Please specify the complaint type");
+      return;
+    }
+
     setSubmitting(true);
     setUploadProgress(true);
     
@@ -145,6 +166,8 @@ const SubmitComplaint = () => {
         attachmentType = file.type;
       }
 
+      const finalCategory = complaintCategory === "Other" ? customCategory : complaintCategory;
+
       const { error } = await supabase
         .from("complaints")
         .insert([
@@ -157,7 +180,8 @@ const SubmitComplaint = () => {
             attachment_url: attachmentUrl,
             attachment_name: attachmentName,
             attachment_type: attachmentType,
-          },
+            complaint_category: finalCategory,
+          } as any,
         ]);
 
       if (error) {
@@ -281,6 +305,56 @@ const SubmitComplaint = () => {
                     required
                   />
                 </div>
+
+                {/* Complaint Category Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="complaintCategory">
+                    Complaint Type / Category <span className="text-destructive">*</span>
+                  </Label>
+                  {availableCategories.length > 0 ? (
+                    <Select value={complaintCategory} onValueChange={setComplaintCategory}>
+                      <SelectTrigger id="complaintCategory">
+                        <SelectValue placeholder="Select complaint type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCategories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="complaintCategory"
+                      placeholder="Enter complaint type..."
+                      value={complaintCategory}
+                      onChange={(e) => setComplaintCategory(e.target.value)}
+                      disabled={submitting}
+                      required
+                    />
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Specify the type or category of your complaint
+                  </p>
+                </div>
+
+                {/* Custom Category Input for "Other" */}
+                {complaintCategory === "Other" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="customCategory">
+                      Specify Complaint Type <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="customCategory"
+                      placeholder="Please specify your complaint type..."
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      disabled={submitting}
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="file">
