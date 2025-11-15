@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, MessageSquare, Trash2, ExternalLink, TrendingUp, BarChart3, Settings, Star, Building2 } from "lucide-react";
+import { Plus, MessageSquare, Trash2, ExternalLink, TrendingUp, BarChart3, Settings, Star } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +22,6 @@ import AdminHeader from "@/components/AdminHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
-import { getCategoryLabel } from "@/config/categories";
 
 interface ComplaintBox {
   id: string;
@@ -350,14 +348,6 @@ const Dashboard = () => {
                             <CardDescription className="text-sm break-words line-clamp-2">
                               {box.description || "No description"}
                             </CardDescription>
-                            {(box as any).category && (
-                              <div className="flex items-center gap-2 mt-2">
-                                <Building2 className="h-3 w-3 text-primary" />
-                                <Badge variant="secondary" className="text-xs">
-                                  {getCategoryLabel((box as any).category)}
-                                </Badge>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </CardHeader>
