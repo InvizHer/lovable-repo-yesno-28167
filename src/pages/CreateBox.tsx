@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Plus, ArrowLeft, Lock } from "lucide-react";
+import { Loader2, Plus, ArrowLeft, Lock, Building2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import AdminHeader from "@/components/AdminHeader";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import { COMPLAINT_BOX_CATEGORIES, requiresCustomInput } from "@/config/categories";
 
 const CreateBox = () => {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ const CreateBox = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [password, setPassword] = useState("");
+  const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,6 +60,16 @@ const CreateBox = () => {
       return;
     }
 
+    if (!category) {
+      toast.error("Please select a category");
+      return;
+    }
+
+    if (requiresCustomInput(category) && !subcategory) {
+      toast.error("Please enter a custom category name");
+      return;
+    }
+
     if (!user) {
       toast.error("You must be logged in to create a complaint box");
       return;
@@ -74,6 +88,8 @@ const CreateBox = () => {
             title,
             description: description || null,
             password: password || null,
+            category,
+            subcategory: requiresCustomInput(category) ? subcategory : null,
             token,
           },
         ])
@@ -176,11 +192,62 @@ const CreateBox = () => {
                     />
                   </motion.div>
 
+                  {/* Category Selection */}
                   <motion.div 
                     className="space-y-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
+                  >
+                    <Label htmlFor="category" className="text-base flex items-center gap-2">
+                      <Building2 className="w-4 h-4" />
+                      Department / Field Category <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger id="category" className="h-12 text-base">
+                        <SelectValue placeholder="Select category for this complaint box" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMPLAINT_BOX_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground flex items-start gap-2 bg-secondary/50 p-3 rounded-lg">
+                      <span className="text-primary">🏢</span>
+                      Choose the department or field this complaint box is for
+                    </p>
+                  </motion.div>
+
+                  {/* Custom Category Input */}
+                  {requiresCustomInput(category) && (
+                    <motion.div 
+                      className="space-y-2"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <Label htmlFor="subcategory" className="text-base">
+                        Custom Category Name <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="subcategory"
+                        placeholder="Enter your custom category name..."
+                        value={subcategory}
+                        onChange={(e) => setSubcategory(e.target.value)}
+                        disabled={loading}
+                        className="text-base h-12"
+                      />
+                    </motion.div>
+                  )}
+
+                  <motion.div 
+                    className="space-y-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 }}
                   >
                     <Label htmlFor="password" className="text-base flex items-center gap-2">
                       <Lock className="w-4 h-4" />
@@ -205,7 +272,7 @@ const CreateBox = () => {
                     className="flex flex-col sm:flex-row gap-3 pt-4"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
+                    transition={{ delay: 0.7 }}
                   >
                     <Button 
                       type="submit" 
